@@ -4,11 +4,13 @@ from pathlib import Path
 import requests
 from PIL import Image
 from PySide6.QtCore import Qt, QObject, Signal, QThread
-from PySide6.QtGui import QPixmap
+from PySide6.QtGui import QPixmap, QIcon
 from PySide6.QtWidgets import (QApplication,QMainWindow,QWidget,QFrame,QVBoxLayout,QHBoxLayout,QLabel,
     QPushButton,QLineEdit,QComboBox,QListWidget,QListWidgetItem,QFileDialog,QMessageBox,QGraphicsDropShadowEffect)
 from PySide6.QtGui import QColor
 
+ASSET_DIR=Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parent))
+LOGO=ASSET_DIR/"logo.png"
 ROOT=Path(os.getenv("APPDATA",str(Path.home())))/"Aniro"
 ROOT.mkdir(parents=True,exist_ok=True)
 FAV=ROOT/"favorites.json"
@@ -47,6 +49,7 @@ class Aniro(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Aniro");self.resize(1160,780);self.setMinimumSize(850,590)
+        if LOGO.is_file():self.setWindowIcon(QIcon(str(LOGO)))
         self.items=[];self.selected=None;self.threads=[]
         try:self.favorites=json.loads(FAV.read_text(encoding="utf-8"))
         except (OSError,ValueError):self.favorites=[]
@@ -54,6 +57,10 @@ class Aniro(QMainWindow):
         main=QVBoxLayout(root);main.setContentsMargins(28,20,28,16);main.setSpacing(14)
         top=QHBoxLayout()
         brand=QLabel("ANIRO");brand.setStyleSheet("color:#70d1ff;font-size:25px;font-weight:900;letter-spacing:3px")
+        if LOGO.is_file():
+            logo=QLabel();logo.setFixedSize(48,48)
+            logo.setPixmap(QPixmap(str(LOGO)).scaled(48,48,Qt.KeepAspectRatio,Qt.SmoothTransformation))
+            top.addWidget(logo)
         top.addWidget(brand);top.addStretch()
         self.title=QLabel("Discover wallpapers");self.title.setStyleSheet("font-size:20px;font-weight:700")
         top.addWidget(self.title);main.addLayout(top)
